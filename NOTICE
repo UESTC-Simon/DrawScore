@@ -1,0 +1,13 @@
+DrawScore
+Copyright 2026 DrawScore contributors
+
+This distribution includes code adapted from CADGenBench:
+https://github.com/huggingface/cadgenbench
+Revision: 8ae143221935ecece1d3d4b5141f3afa4e915988
+Copyright 2026 Hugging Face
+Licensed under the Apache License, Version 2.0.
+
+Affected files: drawscore/alignment.py and drawscore/sampling.py.
+Adaptations retain only rigid PCA/ICP registration and area-weighted surface sampling,
+reuse per-pair ICP preparation, add type annotations, remove profiling and intermediate
+STEP exports, and report unusable solid geometry explicitly.

@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "drawscore"
+version = "0.1.0"
+description = "Drawing similarity of STEP models through aligned orthographic curve coverage"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = [
+  "build123d==0.11.1",
+  # Open3D's Linux wheel requires this, but its index metadata omits it.
+  "ipywidgets==8.1.9",
+  "numpy==2.5.1",
+  "open3d==0.19.0",
+  "scipy==1.18.0",
+  "shapely==2.1.2",
+]
+
+[project.urls]
+Repository = "https://github.com/UESTC-Simon/DrawScore"
+
+[project.scripts]
+drawscore = "drawscore.cli:main"
+
+[dependency-groups]
+dev = [
+  "black==26.10.1",
+  "pyright==1.1.411",
+  "pytest==9.1.1",
+  "ruff==0.16.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["drawscore"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/drawscore", "/tests", "/README.md", "/LICENSE", "/NOTICE", "/pyproject.toml",
+  "/uv.lock", "/assets",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]
+
+[tool.pyright]
+include = ["drawscore"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
