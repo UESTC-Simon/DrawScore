@@ -1,5 +1,3 @@
-# Copyright 2026 Hugging Face
-# SPDX-License-Identifier: Apache-2.0
 # Adapted from CADGenBench alignment; see NOTICE for provenance and changes.
 """Rigid PCA and multiscale ICP registration for DrawScore."""
 

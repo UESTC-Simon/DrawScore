@@ -1,5 +1,3 @@
-# Copyright 2026 Hugging Face
-# SPDX-License-Identifier: Apache-2.0
 # Adapted from CADGenBench sampling; see NOTICE for provenance and changes.
 """Area-weighted sampling of tessellated STEP solid surfaces."""
 
