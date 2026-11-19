@@ -6,7 +6,7 @@ Official implementation of our paper: [DrawScore: Evaluating Generated CAD Model
 
 We introduce **DrawScore**, a metric for evaluating generated CAD parts through their orthographic engineering views.
 
-Volume and surface metrics can give little weight to a misplaced hole or a slot cut into the wrong face because the error affects a small fraction of the part’s volume or surface area. In the figure below, candidate A scores **96.85%** on volumetric IoU and **54.75%** on DrawScore. Compare the top and right views: both slots belong on the top face, but the candidate has them on the right.
+Volume and surface metrics can give little weight to a misplaced hole or a slot cut into the wrong face because the error affects a small fraction of the part’s volume or surface area. In the figure below, candidate A puts both slots on the right face even though they belong on top. An engineer can spot the error at a glance in the orthographic views, yet volumetric IoU reaches **96.85%**. DrawScore’s **54.75%** better reflects the mismatch visible in the drawings.
 
 <p align="center">
   <img src="assets/slot-comparison.png" width="640" alt="Reference part and two generated candidates. Candidate A moves the slots to the right face and scores 54.75% on DrawScore. Candidate B keeps them on top and scores 96.25%.">
