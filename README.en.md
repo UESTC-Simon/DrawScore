@@ -6,7 +6,11 @@ Official implementation of our paper: [DrawScore: Evaluating Generated CAD Model
 
 We introduce **DrawScore**, a metric for evaluating generated CAD parts through their orthographic engineering views.
 
-Volumetric IoU measures how much two solids overlap. In Figure 1 of the paper, the generated part scores **96.85%** on IoU even though both slots were cut into the right face instead of the top. The displaced outlines show up in the front and top views, and the same part scores **54.75%** on DrawScore.
+Volumetric IoU measures how much two solids overlap. In the figure below, candidate A scores **96.85%** on IoU even though both slots were cut into the right face instead of the top. The displaced outlines show up in the front and top views, and the same part scores **54.75%** on DrawScore.
+
+<p align="center">
+  <img src="assets/slot-comparison.png" width="640" alt="Reference part and two generated candidates. Candidate A moves the slots to the right face and scores 54.75% on DrawScore. Candidate B keeps them on top and scores 96.25%.">
+</p>
 
 Given a reference STEP file and a candidate STEP file, DrawScore aligns the two solids and compares visible and hidden lines in their front, top, and right views. The lowest-scoring view determines the final score.
 
@@ -34,9 +38,7 @@ The command prints one score to ten decimal places. Higher values indicate close
 
 ## How DrawScore works
 
-In the top view below, two slot outlines appear on the sloping face of the reference part. Both are missing from that face in candidate A. Candidate B keeps the slots on top but reverses one slot profile. The two candidates differ by **1.38 percentage points** in volumetric IoU and **41.50 percentage points** in DrawScore.
-
-![Reference part and two generated candidates. Candidate A moves the slots to the right face and scores 54.75% on DrawScore. Candidate B keeps them on top and scores 96.25%.](assets/slot-comparison.png)
+In the top view, two slot outlines appear on the sloping face of the reference part. Both are missing from that face in candidate A. Candidate B keeps the slots on top but reverses one slot profile. The two candidates differ by **1.38 percentage points** in volumetric IoU and **41.50 percentage points** in DrawScore.
 
 1. **Align the solids.** DrawScore samples both surfaces, estimates initial poses from their principal axes, and computes the rotation and translation with multiscale point-to-plane ICP.
 2. **Project the engineering views.** Hidden-line removal produces visible and hidden curves from both solids using the same cameras. Each of the front, top, and right views is sampled at eight nearby angles.
