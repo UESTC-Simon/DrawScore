@@ -4,9 +4,9 @@
 
 [简体中文](README.md) · **English**
 
-We introduce **DrawScore**, a geometric similarity metric that evaluates generated CAD models using three orthographic engineering views.
+We introduce **DrawScore**, a metric that compares a generated CAD part with a reference by matching visible and hidden lines in their front, top, and right views and taking the lowest of the three scores.
 
-Volume and surface metrics can give little weight to a misplaced hole or a slot cut into the wrong face, while DrawScore measures deviations along visible and hidden lines in all three views.
+Volumetric IoU measures how much the solids overlap, so the part in Figure 1 scores **96.85%** even with both slots cut into the right face instead of the top, while DrawScore gives the same part **54.75%**.
 
 ## Quick start
 
@@ -32,11 +32,11 @@ The command prints one score to ten decimal places. Higher values indicate close
 
 ## How DrawScore works
 
-In Figure 1 of the paper, the reference part has two slots on its sloping top face. Candidate A cuts both slots into the right face, while candidate B reverses the profile of just one slot. Their volumetric IoUs are **96.85%** and **98.23%**. In the top and front views, entire outlines move in A, while the change in B is local. DrawScore ranges from 0 to 1, with higher scores indicating closer drawing agreement. A scores **0.5475** and B scores **0.9625**.
+In the top view below, two slot outlines appear on the sloping face of the reference part. Both are missing from that face in candidate A. Candidate B keeps the slots on top but reverses one slot profile. The two candidates differ by **1.38 percentage points** in volumetric IoU and **41.50 percentage points** in DrawScore.
 
 ![Reference part and two generated candidates. Candidate A moves the slots to the right face and scores 54.75% on DrawScore. Candidate B keeps them on top and scores 96.25%.](assets/slot-comparison.png)
 
-1. **Align the solids.** DrawScore samples both surfaces, proposes rigid poses from their principal axes, and refines the alignment with multiscale point-to-plane ICP. Registration is approximate for rotated parts.
+1. **Align the solids.** DrawScore samples both surfaces, estimates initial poses from their principal axes, and computes the rotation and translation with multiscale point-to-plane ICP.
 2. **Project the engineering views.** Hidden-line removal produces visible and hidden curves from both solids using the same cameras. Each of the front, top, and right views is sampled at eight nearby angles.
 3. **Measure missing and extra lines.** Each point along a reference curve receives credit according to its distance from the nearest candidate curve of the same visibility. Reversing the comparison measures extra lines in the candidate. The Gaussian weighting gives almost no credit to lines far outside the tolerance. A misplaced slot therefore counts in proportion to the length of the affected outlines.
 4. **Keep the lowest view score.** Within each view, DrawScore averages precision and recall over the eight angles and takes their harmonic mean. Taking the minimum across views keeps a poor match in the right view visible in the final score even when the front and top views agree.
