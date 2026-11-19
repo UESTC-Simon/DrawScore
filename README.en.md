@@ -36,8 +36,6 @@ The command prints one score to ten decimal places. Higher values indicate close
 
 ## How DrawScore works
 
-In the top view, two slot outlines appear on the sloping face of the reference part. Both are missing from that face in candidate A. Candidate B keeps the slots on top but reverses one slot profile. The two candidates differ by **1.38 percentage points** in volumetric IoU and **41.50 percentage points** in DrawScore.
-
 1. **Align the solids.** DrawScore samples both surfaces, estimates initial poses from their principal axes, and computes the rotation and translation with multiscale point-to-plane ICP.
 2. **Project the engineering views.** Hidden-line removal produces visible and hidden curves from both solids using the same cameras. Each of the front, top, and right views is sampled at eight nearby angles.
 3. **Measure missing and extra lines.** Each point along a reference curve receives credit according to its distance from the nearest candidate curve of the same visibility. Reversing the comparison measures extra lines in the candidate. The Gaussian weighting gives almost no credit to lines far outside the tolerance. A misplaced slot therefore counts in proportion to the length of the affected outlines.
