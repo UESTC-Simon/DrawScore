@@ -1,12 +1,14 @@
 ![DrawScore](assets/logo.jpg)
 
-# Evaluating Generated CAD Models against Engineering Drawings
+Official implementation of our paper: [DrawScore: Evaluating Generated CAD Models against Engineering Drawings](https://arxiv.org/abs/2611.24681).
 
 [简体中文](README.md) · **English**
 
-We introduce **DrawScore**, a metric that compares a generated CAD part with a reference by matching visible and hidden lines in their front, top, and right views and taking the lowest of the three scores.
+We introduce **DrawScore**, a metric for evaluating generated CAD parts through their orthographic engineering views.
 
-Volumetric IoU measures how much the solids overlap, so the part in Figure 1 scores **96.85%** even with both slots cut into the right face instead of the top, while DrawScore gives the same part **54.75%**.
+Volumetric IoU measures how much two solids overlap. In Figure 1 of the paper, the generated part scores **96.85%** on IoU even though both slots were cut into the right face instead of the top. The displaced outlines show up in the front and top views, and the same part scores **54.75%** on DrawScore.
+
+Given a reference STEP file and a candidate STEP file, DrawScore aligns the two solids and compares visible and hidden lines in their front, top, and right views. The lowest-scoring view determines the final score.
 
 ## Quick start
 
@@ -50,14 +52,6 @@ The default deadline is 60 seconds. This command allows three minutes for a comp
 ```bash
 drawscore reference.step candidate.step --tolerance 0.005 --timeout 180
 ```
-
-## Results from the paper
-
-| Question | What we observed |
-| --- | --- |
-| How often does high IoU hide a drawing discrepancy? | Six CAD generation configurations produced 1,188 valid outputs. Of the 1,007 with IoU ≥ 0.95, **190 (18.9%)** scored below 0.95 on DrawScore (Figure 5). |
-| Can DrawScore serve as a training reward? | On 153 held-out Fusion360 models, the share of valid outputs rose from **75.2%** for the supervised checkpoint to **89.5%** after reinforcement learning with DrawScore (Table 2). |
-| Can a drawing help select a candidate at inference time? | On 20 BenchCAD cases with eight candidates per case, valid candidates averaged **0.529** on surface F-score. Picking the best match to each input drawing by DrawScore raised that average to **0.555**. The experiment used vector drawings projected from the reference solids (Table 3). |
 
 ## Python API
 

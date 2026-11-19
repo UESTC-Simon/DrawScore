@@ -1,12 +1,16 @@
 ![DrawScore](assets/logo.jpg)
 
+Official implementation of our paper: [DrawScore: Evaluating Generated CAD Models against Engineering Drawings](https://arxiv.org/abs/2611.24681).
+
 # 用工程三视图评估生成的 CAD 模型
 
 **简体中文** · [English](README.en.md)
 
-我们推出 **DrawScore**：它把生成的 CAD 零件和参考零件投影成三视图，分别比对主视图、俯视图和右视图中的可见线与隐藏线，取三个视图中的最低分作为模型得分。
+我们推出 **DrawScore**：一种用工程三视图评估 CAD 生成结果的指标。
 
-传统的体积 IoU 衡量两个实体的重叠程度，论文图 1 中的零件即使把顶面的两道槽都开到了右侧面，IoU 也有 **96.85%**，DrawScore 给它的分数是 **54.75%**。
+传统的体积 IoU 衡量两个实体有多少体积重合。论文图 1 中，生成的零件把顶面的两道槽都开到了右侧面，体积 IoU 依然有 **96.85%**。换到主视图和俯视图，槽的轮廓整段错位，同一个零件的 DrawScore 是 **54.75%**。
+
+给定参考零件和生成零件的 STEP 文件，DrawScore 将两者对齐，分别比对主视图、俯视图和右视图中的可见线与隐藏线。三个视图里吻合度最低的那个，决定最终得分。
 
 ## 快速开始
 
@@ -50,14 +54,6 @@ drawscore reference.step candidate.step
 ```bash
 drawscore reference.step candidate.step --tolerance 0.005 --timeout 180
 ```
-
-## 论文结果
-
-| 研究问题 | 实验观察 |
-| --- | --- |
-| IoU 达到 0.95 的零件，有多少在 DrawScore 上低于 0.95？ | 六种 CAD 生成配置共产生 1,188 个有效输出，其中 1,007 个的 IoU 达到 0.95。在这 1,007 个零件中，**190 个（18.9%）** 的 DrawScore 低于 0.95（图 5）。 |
-| 用 DrawScore 作训练奖励，生成结果有何变化？ | 从同一监督微调检查点出发，用 DrawScore 作奖励进行强化学习。在 153 个留出的 Fusion360 测试模型上，有效输出比例从 **75.2%** 升至 **89.5%**（表 2）。 |
-| 能否根据输入图纸挑选生成结果？ | 在 20 个 BenchCAD 案例上，每例生成 8 个候选，以参考实体投影出的矢量图模拟输入图纸。按 DrawScore 选出最吻合的候选后，平均表面 F-score 为 **0.555**，高于所有有效候选的平均值 **0.529**（表 3）。 |
 
 ## Python 接口
 
