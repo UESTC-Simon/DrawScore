@@ -4,7 +4,7 @@ Official implementation of our paper: [DrawScore: Evaluating Generated CAD Model
 
 [简体中文](README.md) · **English**
 
-We introduce **DrawScore**, a metric that projects a generated CAD part and its reference into three orthographic views with visible and hidden lines. It compares the projected curves in each view and takes the lowest of the three scores as the final score.
+We introduce **DrawScore**, a metric for evaluating generated CAD parts through their orthographic engineering views.
 
 Volume and surface metrics can give little weight to a misplaced hole or a slot cut into the wrong face because the error affects a small fraction of the part’s volume or surface area. In the figure below, candidate A has both slots on the right face instead of the top and still scores **96.85%** on volumetric IoU. The slot outlines shift in both the front and top views, and DrawScore gives the same part **54.75%**.
 

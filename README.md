@@ -6,7 +6,7 @@ Official implementation of our paper: [DrawScore: Evaluating Generated CAD Model
 
 **简体中文** · [English](README.en.md)
 
-我们推出 **DrawScore**：它将生成的 CAD 零件与参考零件投影为包含可见线和隐藏线的正交三视图，沿投影曲线逐线比对，并取三个视图中的最低分作为模型最终得分。
+我们推出 **DrawScore**：一种用工程三视图评估 CAD 生成结果的指标。
 
 传统的体积和表面指标容易低估孔位偏移、槽开错面这类影响制造的错误，因为受影响的体积或表面积往往很小。如图，候选 A 把顶面的两道槽都开到了右侧面，体积 IoU 仍高达 **96.85%**。但在主视图和俯视图里，槽的轮廓整段错位，DrawScore 给同一个零件的分数是 **54.75%**。
 
