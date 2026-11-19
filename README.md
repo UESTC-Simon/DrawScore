@@ -34,7 +34,7 @@ python -m pip install .
 drawscore reference.step candidate.step
 ```
 
-命令输出一个 0 到 1 之间的分数，保留十位小数，越接近 1 表示三视图越吻合。也可以用 `python -m drawscore` 加相同参数运行。评分失败时，程序将原因写入标准错误，并以非零状态码退出。
+终端会显示一个分数，例如 `0.9700000000`。DrawScore 从 0 到 1，两个零件的三视图越相似，得分就越高。也可以用 `python -m drawscore` 加相同参数运行。评分失败时，程序将原因写入标准错误，并以非零状态码退出。
 
 ## 评分原理
 
