@@ -1,17 +1,20 @@
-<h1 align="center"><img src="assets/logo.jpg" alt="DrawScore" width="360"></h1>
+![DrawScore](assets/logo.jpg)
 
-<p align="center"><strong>Evaluating Generated CAD Models against Engineering Drawings</strong></p>
-<p align="center"><a href="#quick-start">Quick start</a> · <a href="#how-drawscore-works">How DrawScore works</a> · <a href="#results-from-the-paper">Results from the paper</a> · <a href="#python-api">Python API</a></p>
+# 用工程三视图评估生成的 CAD 模型
 
-The drawing calls for two slots on the sloping top face. Candidate A cuts both into the right face and still gets **96.85% volumetric IoU**. Candidate B keeps the slots on top but reverses the profile of one slot. Its IoU is **98.23%**. Moving the slots changes very little of the part’s volume, but it moves entire outlines in the top and front views.
+**简体中文** · [English](README.en.md)
 
-![Reference part and two generated candidates. Candidate A moves the slots to the right face and scores 54.75% on DrawScore. Candidate B keeps them on top and scores 96.25%.](assets/slot-comparison.png)
+[快速开始](#快速开始) · [评分原理](#评分原理) · [论文结果](#论文结果) · [Python 接口](#python-接口)
 
-**DrawScore** compares the visible and hidden lines in the front, top, and right views. It takes two STEP solids and returns a similarity between **0 and 1**, using the lowest-scoring view. In this example from Figure 1 of the paper, the two candidates score **0.5475** and **0.9625**.
+图纸要求在倾斜的顶面开两道槽。下图中，候选 A 把两道槽都开到了右侧面，体积交并比（IoU）仍有 **96.85%**。候选 B 把槽开在了正确的面上，只把其中一道槽的轮廓反了过来，IoU 为 **98.23%**。两者的 IoU 只差 1.38 个百分点。再看俯视图和主视图，A 的槽线整段错位，B 的偏差只出现在局部。
 
-## Quick start
+![论文图 1。左侧为参考零件，中间为将两道槽开错面的候选 A，右侧为仅反转一道槽轮廓的候选 B。](assets/slot-comparison.png)
 
-Install from the repository with **Python 3.12**. DrawScore runs on CPU using OpenCascade (via build123d) and Open3D.
+**DrawScore 衡量这些线条有多吻合。** 它从两个 STEP 实体生成主视图、俯视图和右视图，分别比较可见线和隐藏线，取三个视图中的最低分。分数范围为 0 到 1，越高表示图纸越吻合。图中的 A 得 **0.5475**，B 得 **0.9625**。
+
+## 快速开始
+
+使用 **Python 3.12**。DrawScore 在 CPU 上运行，通过 build123d 调用 OpenCascade 处理几何，并使用 Open3D 配准模型。以下安装命令适用于 Bash。
 
 ```bash
 git clone https://github.com/UESTC-Simon/DrawScore.git
@@ -21,42 +24,42 @@ source .venv/bin/activate
 python -m pip install .
 ```
 
-On Debian or Ubuntu, if Open3D reports a missing OpenGL or OpenMP library, install the system runtimes with `sudo apt-get install libgl1 libgomp1`.
+在 Debian 或 Ubuntu 上，如果导入 Open3D 时提示缺少 OpenGL 或 OpenMP 运行库，可运行 `sudo apt-get install libgl1 libgomp1`。
 
-Run the following with your own STEP files, reference first. Both must contain solids at the same physical scale. DrawScore aligns their poses by rotation and translation.
+将两个文件名换成自己的 STEP 文件，第一个是参考模型，第二个是待评估模型。两个文件都应包含实体，并采用相同的物理尺度。DrawScore 会旋转、平移候选模型，使其与参考模型对齐。
 
 ```bash
 drawscore reference.step candidate.step
 ```
 
-The command prints one score to ten decimal places. Higher values indicate closer drawing agreement. Use `python -m drawscore` with the same arguments to run it as a module. A failed comparison writes an error to standard error and exits with a nonzero status.
+命令向标准输出打印一个保留十位小数的分数。也可以用 `python -m drawscore` 加相同参数运行。评分失败时，程序将原因写入标准错误，并以非零状态码退出。
 
-## How DrawScore works
+## 评分原理
 
-1. **Align the solids.** DrawScore samples both surfaces, proposes rigid poses from their principal axes, and refines the alignment with multiscale point-to-plane ICP. Registration is approximate for rotated parts.
-2. **Project the engineering views.** Hidden-line removal produces visible and hidden curves from both solids using the same cameras. Each of the front, top, and right views is sampled at eight nearby angles.
-3. **Measure missing and extra lines.** Each point along a reference curve receives credit according to its distance from the nearest candidate curve of the same visibility. Reversing the comparison measures extra lines in the candidate. The Gaussian weighting gives almost no credit to lines far outside the tolerance. A misplaced slot therefore counts in proportion to the length of the affected outlines.
-4. **Keep the lowest view score.** Within each view, DrawScore averages precision and recall over the eight angles and takes their harmonic mean. Taking the minimum across views keeps a poor match in the right view visible in the final score even when the front and top views agree.
+1. **对齐两个实体。** 在两个模型的表面采样，用主成分分析估计候选姿态，再用多尺度点到平面 ICP 细化配准。旋转后的零件可能仍有少量配准误差。
+2. **生成三个方向的线图。** 两个模型共用相机。几何内核在主视、俯视和右视方向提取可见线与隐藏线，并在每个标准方向附近选取八个角度采样。
+3. **分别计算漏画和多画的线。** 沿参考曲线按弧长采样，寻找候选图中最近的同类线条，可见线匹配可见线，隐藏线匹配隐藏线。距离越远，按高斯函数得到的匹配分越低。交换参考图和候选图再算一遍，就能同时衡量参考线条的缺失和候选图中多出的线条。
+4. **取吻合度最低的视图。** 每个视图先对八个角度的精确率和召回率分别取平均，再求两者的调和平均。若右视图上的孔位偏了，即使主视图和俯视图都吻合，右视图的误差也会体现在总分里。
 
-### Tolerance and timeout
+### 容差与超时
 
-The default tolerance is `0.005` times the reference bounding-box diagonal. For a 100 mm diagonal, the Gaussian distance scale is 0.5 mm. At that distance, a curve sample still receives about 61% credit. A smaller tolerance makes the comparison stricter, uses more curve samples, and narrows the range of viewing angles. Valid tolerance values lie strictly between 0 and 1.
+`--tolerance` 指定高斯距离尺度占参考模型包围盒对角线的比例，默认值为 `0.005`。例如，对角线长 100 mm 时，对应的距离尺度是 0.5 mm。两条线相距 0.5 mm 时，该采样点仍能得到约 61% 的匹配分。容差须大于 0 且小于 1。取值越小，匹配越严格，曲线采样越密，视角采样范围也越窄。
 
-The default deadline is 60 seconds. This command allows three minutes for a complex pair.
+默认超时为 60 秒。复杂模型可以延长到 180 秒。
 
 ```bash
 drawscore reference.step candidate.step --tolerance 0.005 --timeout 180
 ```
 
-## Results from the paper
+## 论文结果
 
-| Question | What we observed |
+| 研究问题 | 实验观察 |
 | --- | --- |
-| How often does high IoU hide a drawing discrepancy? | Six CAD generation configurations produced 1,188 valid outputs. Of the 1,007 with IoU ≥ 0.95, **190 (18.9%)** scored below 0.95 on DrawScore (Figure 5). |
-| Can DrawScore serve as a training reward? | On 153 held-out Fusion360 models, the share of valid outputs rose from **75.2%** for the supervised checkpoint to **89.5%** after reinforcement learning with DrawScore (Table 2). |
-| Can a drawing help select a candidate at inference time? | On 20 BenchCAD cases with eight candidates per case, valid candidates averaged **0.529** on surface F-score. Picking the best match to each input drawing by DrawScore raised that average to **0.555**. The experiment used vector drawings projected from the reference solids (Table 3). |
+| 高 IoU 的模型中，有多少在图纸上仍有偏差？ | 六种 CAD 生成配置共得到 1,188 个有效输出。其中 1,007 个的 IoU ≥ 0.95，这组中有 **190 个（18.9%）** 的 DrawScore 低于 0.95（图 5）。 |
+| 用 DrawScore 作训练奖励，生成结果有何变化？ | 在 153 个留出的 Fusion360 模型上，以监督微调模型为起点，用 DrawScore 作奖励进行强化学习后，有效输出比例从 **75.2%** 升至 **89.5%**（表 2）。 |
+| 能否根据输入图纸挑选生成结果？ | 在 20 个 BenchCAD 案例上，每例生成 8 个候选，以参考实体投影出的矢量图模拟输入图纸。按 DrawScore 选出最吻合的候选后，平均表面 F-score 为 **0.555**，高于所有有效候选的平均值 **0.529**（表 3）。 |
 
-## Python API
+## Python 接口
 
 ```python
 from drawscore import score_drawscore
@@ -66,11 +69,11 @@ if __name__ == "__main__":
     print(f"{score:.10f}")
 ```
 
-Keep the main guard in scripts. Scoring starts a worker process so that the timeout can interrupt geometry operations. The Python API accepts the same `timeout` in seconds as the CLI.
+在脚本中请保留 `if __name__ == "__main__":`。评分在独立进程中执行，以便在超时时终止几何运算。可以通过 `timeout` 指定秒数。
 
-## Development
+## 开发与测试
 
-Use [uv](https://docs.astral.sh/uv/) to install the locked development environment and run the checks.
+使用 uv 安装锁定版本的开发依赖并运行检查。
 
 ```bash
 uv sync --locked
@@ -80,6 +83,6 @@ uv run black --check .
 uv run pyright
 ```
 
-## License and attribution
+## 许可证与致谢
 
-DrawScore is released under the [Apache License 2.0](LICENSE). Its rigid alignment and surface sampling routines include code adapted from [CADGenBench](https://github.com/huggingface/cadgenbench). The [NOTICE](NOTICE) records the upstream revision and adaptations.
+DrawScore 采用 [Apache License 2.0](LICENSE)。刚体配准和表面采样的部分代码改编自 [CADGenBench](https://github.com/huggingface/cadgenbench)，对应的上游版本和改编说明见 [NOTICE](NOTICE)。
