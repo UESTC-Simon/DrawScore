@@ -8,7 +8,7 @@ Official implementation of our paper: [DrawScore: Evaluating Generated CAD Model
 
 我们推出 **DrawScore**：一种用工程三视图评估 CAD 生成结果的指标。
 
-传统的体积和表面指标容易低估孔位偏移、槽开错面这类影响制造的错误，因为受影响的体积或表面积往往很小。如图，候选 A 把顶面的两道槽都开到了右侧面，体积 IoU 仍高达 **96.85%**。但在主视图和俯视图里，槽的轮廓整段错位，DrawScore 给同一个零件的分数是 **54.75%**。
+传统的体积和表面指标容易低估孔位偏移、槽开错面这类影响制造的错误，因为受影响的体积或表面积往往很小。如图，候选 A 的体积 IoU 高达 **96.85%**，DrawScore 却是 **54.75%**。对照俯视图和右视图就能看出，两道本该开在顶面的槽都开到了右侧面。
 
 <p align="center">
   <img src="assets/slot-comparison.png" width="640" alt="左侧是参考零件。中间的 A 将两道槽移到右侧面，DrawScore 为 54.75%。右侧的 B 反转了一道槽的轮廓，DrawScore 为 96.25%。">
